@@ -9,10 +9,11 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   net_ip = "192.168.50"
 
   # import the box once and then create references for all other instaces
-  config.linked_clone = true
+  #config.linked_clone = true
 
   config.vm.define :master, primary: true do |master_config|
     master_config.vm.provider "virtualbox" do |vb|
+      vb.linked_clone = true
         vb.memory = "2048"
         vb.cpus = 1
         vb.name = "master"
@@ -23,7 +24,11 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     master_config.vm.network "private_network", ip: "#{net_ip}.10"
     master_config.vm.synced_folder "saltstack/salt/", "/srv/salt"
 	  master_config.vm.synced_folder "saltstack/etc/master.d/", "/etc/salt/master.d"
-	
+    
+    # fix for salt /bin/sh vs. /usr/bin/sh issue
+    master_config.vm.provision "shell",
+      inline: "ln -sf /bin/sh /usr/bin/sh"
+
     master_config.vm.provision :salt do |salt|
 	    salt.minion_config = "saltstack/etc/m_minion"
       salt.master_config = "saltstack/etc/master"
@@ -52,6 +57,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   ].each do |vmname,ip,mem,os|
     config.vm.define "#{vmname}" do |minion_config|
       minion_config.vm.provider "virtualbox" do |vb|
+          vb.linked_clone = true
           vb.memory = "#{mem}"
           vb.cpus = 1
           vb.name = "#{vmname}"
@@ -60,6 +66,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       minion_config.vm.box = "#{os}"
       minion_config.vm.hostname = "#{vmname}"
       minion_config.vm.network "private_network", ip: "#{ip}"
+      # fix for salt /bin/sh vs. /usr/bin/sh issue
+      minion_config.vm.provision "shell",
+        inline: "ln -sf /bin/sh /usr/bin/sh"
 
       minion_config.vm.provision :salt do |salt|
         salt.minion_config = "saltstack/etc/#{vmname}"
