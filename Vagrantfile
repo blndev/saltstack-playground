@@ -13,15 +13,20 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   config.vm.define :master, primary: true do |master_config|
     master_config.vm.provider "virtualbox" do |vb|
-      vb.linked_clone = true
+        vb.linked_clone = true
         vb.memory = "2048"
         vb.cpus = 1
         vb.name = "master"
-    end
+        #fix ubuntu netwrok issue https://stackoverflow.com/questions/18457306/how-to-enable-internet-access-inside-vagrant
+        vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+        vb.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
+        end
     
     master_config.vm.box = "#{os}"
     master_config.vm.host_name = 'master'
     master_config.vm.network "private_network", ip: "#{net_ip}.10"
+    #master_config.vm.network "public_network", type: "dhcp", bridge: "eno1"
+
     master_config.vm.synced_folder "saltstack/salt/", "/srv/salt"
 	  master_config.vm.synced_folder "saltstack/etc/master.d/", "/etc/salt/master.d"
     
@@ -53,7 +58,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
 
   [
-    ["minion",    "#{net_ip}.11",    "3000",    os ],
+    ["minion",  "#{net_ip}.11", "3000", os ],
+    ["minion2", "#{net_ip}.12", "3000", os ],
   ].each do |vmname,ip,mem,os|
     config.vm.define "#{vmname}" do |minion_config|
       minion_config.vm.provider "virtualbox" do |vb|
@@ -61,6 +67,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
           vb.memory = "#{mem}"
           vb.cpus = 1
           vb.name = "#{vmname}"
+          #fix ubuntu network issue https://stackoverflow.com/questions/18457306/how-to-enable-internet-access-inside-vagrant
+          vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+          vb.customize ["modifyvm", :id, "--natdnsproxy1", "on"]          
       end
 
       minion_config.vm.box = "#{os}"
