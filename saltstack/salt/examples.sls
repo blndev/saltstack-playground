@@ -1,12 +1,13 @@
 # Source for all https://docs.saltstack.com/en/getstarted/config/functions.html
 
-install nano:
-  pkg.installed:
-    - name: nano
+# commented out because pillar example below
+# install vim:
+#   pkg.installed:
+#     - name: vim
 
-remove vim:
+remove nano:
   pkg.removed:
-    - name: vim
+    - name: nano
 
 create my_new_directory:
  file.directory:
@@ -49,12 +50,20 @@ myserver in hosts file:
     - name: myserver
     - ip: 192.168.0.42
 
-restart vsftpd:
-  module.run:
-    - name: service.restart
-    - m_name: vsftpd  # m_name gets passed to the execution module as "name"
+# restart vsftpd:
+#   module.run:
+#     - name: service.restart
+#     - m_name: vsftpd  # m_name gets passed to the execution module as "name"
 
-execute some code:
-  module.run:
-    - name: ls
-    - m_name: -a  # m_name gets passed to the execution module as "name"
+# execute some code:
+#   module.run:
+#     - name: ls
+#     - m_name: -a  # m_name gets passed to the execution module as "name"
+
+#reference to a defined pillar
+#https://docs.saltstack.com/en/getstarted/config/pillar.html
+# pillars are saved on each minion and they are locally executed
+# refresh them: salt '*' saltutil.refresh_pillar
+vim installed:
+  pkg.installed:
+    - name: {{ pillar['editor'] }}

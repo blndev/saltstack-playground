@@ -27,28 +27,28 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     master_config.vm.network "private_network", ip: "#{net_ip}.10"
     #master_config.vm.network "public_network", type: "dhcp", bridge: "eno1"
 
-    master_config.vm.synced_folder "saltstack/salt/", "/srv/salt"
-	  master_config.vm.synced_folder "saltstack/etc/master.d/", "/etc/salt/master.d"
+
+    master_config.vm.synced_folder "saltstack/salt/states", "/srv/salt"
+    master_config.vm.synced_folder "saltstack/pillar/", "/srv/pillar"
+    master_config.vm.synced_folder "saltstack/etc/master.d/", "/etc/salt/master.d"
     
     # fix for salt /bin/sh vs. /usr/bin/sh issue
     master_config.vm.provision "shell",
       inline: "ln -sf /bin/sh /usr/bin/sh"
 
     master_config.vm.provision :salt do |salt|
-	    salt.minion_config = "saltstack/etc/m_minion"
       salt.master_config = "saltstack/etc/master"
-      salt.master_key = "saltstack/keys/master_minion.pem"
-      salt.master_pub = "saltstack/keys/master_minion.pub"
-      salt.minion_key = "saltstack/keys/master_minion.pem"
-      salt.minion_pub = "saltstack/keys/master_minion.pub"
+      salt.master_key = "saltstack/keys/master.pem"
+      salt.master_pub = "saltstack/keys/master.pub"
       salt.seed_master = {
-                          "minion" => "saltstack/keys/minion.pub",
-						              "master" => "saltstack/keys/master_minion.pub"
+                          "minion1" => "saltstack/keys/minion1.pub",
+                          "minion2" => "saltstack/keys/minion2.pub",
+                          "minion3" => "saltstack/keys/minion2.pub"
                          }
 
       salt.install_type = "stable"
       salt.install_master = true
-      salt.no_minion = false
+      salt.no_minion = true
       salt.verbose = true
       salt.colorize = true
       salt.python_version = "3"
