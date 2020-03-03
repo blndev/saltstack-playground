@@ -28,7 +28,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     #master_config.vm.network "public_network", type: "dhcp", bridge: "eno1"
 
 
-    master_config.vm.synced_folder "saltstack/salt/states", "/srv/salt"
+    master_config.vm.synced_folder "saltstack/salt/", "/srv/salt"
     master_config.vm.synced_folder "saltstack/pillar/", "/srv/pillar"
     #master_config.vm.synced_folder "saltstack/etc/master.d/", "/etc/salt/master.d"
     
@@ -58,10 +58,10 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
 
   [
-    ["minion1",  "#{net_ip}.11", "3000", os ],
-    ["minion2", "#{net_ip}.12", "3000", os ],
-    ["minion3", "#{net_ip}.13", "3000", os ],
-    ["minion4a", "#{net_ip}.14", "3000", os ],
+    ["minion1",  "#{net_ip}.11", "512", os ],
+    ["minion2", "#{net_ip}.12", "512", os ],
+    ["minion3", "#{net_ip}.13", "512", os ],
+    ["minion4", "#{net_ip}.14", "512", os ],
   ].each do |vmname,ip,mem,os|
     config.vm.define "#{vmname}" do |minion_config|
       minion_config.vm.provider "virtualbox" do |vb|
@@ -85,6 +85,43 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         salt.minion_config = "saltstack/etc/#{vmname}"
         salt.minion_key = "saltstack/keys/#{vmname}.pem"
         salt.minion_pub = "saltstack/keys/#{vmname}.pub"
+        salt.install_type = "stable"
+        salt.verbose = true
+        salt.colorize = true
+		    salt.python_version = "3"
+        salt.bootstrap_options = "-P -c /tmp"
+      end
+    end
+  end
+
+
+  # Test for using teh same key for multipe minions
+  [
+    ["minion5",  "#{net_ip}.15", "512", os ],
+    ["minion6", "#{net_ip}.16", "512", os ],
+  ].each do |vmname,ip,mem,os|
+    config.vm.define "#{vmname}" do |minion_config|
+      minion_config.vm.provider "virtualbox" do |vb|
+          vb.linked_clone = true
+          vb.memory = "#{mem}"
+          vb.cpus = 1
+          vb.name = "#{vmname}"
+          #fix ubuntu network issue https://stackoverflow.com/questions/18457306/how-to-enable-internet-access-inside-vagrant
+          vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+          vb.customize ["modifyvm", :id, "--natdnsproxy1", "on"]          
+      end
+
+      minion_config.vm.box = "#{os}"
+      minion_config.vm.hostname = "#{vmname}"
+      minion_config.vm.network "private_network", ip: "#{ip}"
+      # fix for salt /bin/sh vs. /usr/bin/sh issue
+      minion_config.vm.provision "shell",
+        inline: "ln -sf /bin/sh /usr/bin/sh"
+
+      minion_config.vm.provision :salt do |salt|
+        salt.minion_config = "saltstack/etc/minion_generic.yaml"
+        salt.minion_key = "saltstack/keys/minion_generic.pem"
+        salt.minion_pub = "saltstack/keys/minion_generic.pub"
         salt.install_type = "stable"
         salt.verbose = true
         salt.colorize = true

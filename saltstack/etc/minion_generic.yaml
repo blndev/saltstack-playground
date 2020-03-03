@@ -53,12 +53,11 @@ master: 192.168.50.10
 # same machine but with different ids, this can be useful for salt compute
 # clusters.
 #id:
-id: minion1
 
 # Append a domain to a hostname in the event that it does not exist.  This is
 # useful for systems where socket.getfqdn() does not actually result in a
 # FQDN (for instance, Solaris).
-#append_domain:
+append_domain: salt.playground.lab.blndev.com
 
 # Custom static grains for this minion can be specified here and used in SLS
 # files just like all other grains. This example sets 4 custom grains, with
