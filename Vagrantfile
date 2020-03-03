@@ -30,7 +30,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
     master_config.vm.synced_folder "saltstack/salt/states", "/srv/salt"
     master_config.vm.synced_folder "saltstack/pillar/", "/srv/pillar"
-    master_config.vm.synced_folder "saltstack/etc/master.d/", "/etc/salt/master.d"
+    #master_config.vm.synced_folder "saltstack/etc/master.d/", "/etc/salt/master.d"
     
     # fix for salt /bin/sh vs. /usr/bin/sh issue
     master_config.vm.provision "shell",
