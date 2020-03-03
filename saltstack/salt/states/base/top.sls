@@ -1,14 +1,11 @@
 base:
   '*':
     - packages
+  'test':
     - linux
     - linux.users
+  'minion':
+    - nettools
+  'cicd':
     - nginx
-    - jenkins
-    - jenkins.cli
-    - jenkins.plugins
-    - jenkins.users
-    - jenkins.jobs
-    - jenkins.configuration
-    - jenkins.views
-    - jenkins.credentials
+
