@@ -14,7 +14,12 @@ Minion 3 - client installed with a different Key than prepared on the sever - re
 Minion 4 - unknown key, needs to be accepted (share Key with Minion 2)
 Minion 5,6 - using a shared key and shared config - both getting fqdn and needs to be accepted
 
-## getting started
+## Terminology
+
+Pillar: a file with dynamic variables, pushed and executed on each minion
+Salt: a Package (SLS File) which defines a set of actions to be executed on each minion
+
+## Getting started
 
 To start work with Salt you need the following commands
 
@@ -24,9 +29,22 @@ vagrant ssh master
 sudo su -
 ````
 
-## check all Minions
+### check all Minions
 ````bash
 salt-key --list-all
 salt-key --accept=<key> #or --accept-all 
 salt '*' test.ping
+````
+
+### Apply a Package
+
+````bash
+salt '*' state.apply examples
+````
+
+
+### Apply new Pillars to Minions
+````bash
+salt '*' saltutil.refresh_pillar
+salt '*' pillar.items
 ````
