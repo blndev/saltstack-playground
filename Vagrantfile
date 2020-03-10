@@ -25,8 +25,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     master_config.vm.box = "#{os}"
     master_config.vm.host_name = 'master'
     master_config.vm.network "private_network", ip: "#{net_ip}.10"
-    #master_config.vm.network "public_network", type: "dhcp", bridge: "eno1"
-
 
     master_config.vm.synced_folder "saltstack/salt/", "/srv/salt"
     master_config.vm.synced_folder "saltstack/pillar/", "/srv/pillar"
@@ -42,16 +40,19 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       salt.master_pub = "saltstack/keys/master.pub"
       salt.seed_master = {
                           "minion1" => "saltstack/keys/minion1.pub",
-                          "minion2" => "saltstack/keys/minion2.pub",
-                          "minion3" => "saltstack/keys/minion2.pub"
+                          "minion2" => "saltstack/keys/minion2.pub"
                          }
 
       salt.install_type = "stable"
       salt.install_master = true
-      salt.no_minion = true
+
+      salt.minion_config = "saltstack/etc/minion_generic.yaml"
+      salt.no_minion = false
+
       salt.verbose = true
       salt.colorize = true
       salt.python_version = "3"
+
       salt.bootstrap_options = "-P -c /tmp"
     end
   end
@@ -95,7 +96,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   end
 
 
-  # Test for using teh same key for multipe minions
+  # Test for using the same key for multipe minions
   [
     ["minion5",  "#{net_ip}.15", "512", os ],
     ["minion6", "#{net_ip}.16", "512", os ],
@@ -120,8 +121,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
       minion_config.vm.provision :salt do |salt|
         salt.minion_config = "saltstack/etc/minion_generic.yaml"
-        salt.minion_key = "saltstack/keys/minion_generic.pem"
-        salt.minion_pub = "saltstack/keys/minion_generic.pub"
+        # provisioning without pki, then the minions createing certificates by their own
+        #salt.minion_key = "saltstack/keys/minion_generic.pem"
+        #salt.minion_pub = "saltstack/keys/minion_generic.pub"
         salt.install_type = "stable"
         salt.verbose = true
         salt.colorize = true
