@@ -1,16 +1,17 @@
 # Saltstack-Playground
+
 Virtualbox based Dev/Test System for Salt.
 
 It's based on the original Salt Demo Environment with a gew fixes and modifications.
 You still can run all of the Tutorials menationed in the "getting Started" documentation:
- https://docs.saltstack.com/en/getstarted/fundamentals/install.html  
-
+ <https://docs.saltstack.com/en/getstarted/fundamentals/install.html>  
 
 ## Prepare Environment
+
 If you run VirtuaBox 6.1 you need to patch Vagrant manually, because VB6.1 it's currently not officially supported.
 
 The change are only a few lines of code and well described.
-Please check details here: https://github.com/oracle/vagrant-boxes/issues/178
+Please check details here: <https://github.com/oracle/vagrant-boxes/issues/178>
 
 ## My Setup
 
@@ -37,9 +38,10 @@ sudo su -
 ````
 
 ### check all Minions
+
 ````bash
 salt-key --list-all
-salt-key --accept=<key> #or --accept-all 
+salt-key --accept=<key> #or --accept-all
 salt '*' test.ping
 ````
 
@@ -49,8 +51,8 @@ salt '*' test.ping
 salt '*' state.apply examples
 ````
 
-
 ### Send new Pillars to Minions
+
 ````bash
 salt '*' saltutil.refresh_pillar
 salt '*' pillar.items
